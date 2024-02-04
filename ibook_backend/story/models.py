@@ -2,8 +2,9 @@ from django.db import models
 
 from users.models import User
 
+
 class Story(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user_story')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="user_story")
     title = models.CharField(max_length=100)
     content = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
@@ -11,14 +12,16 @@ class Story(models.Model):
 
     def __str__(self):
         return self.title
-    
+
+
 class ChatLog(models.Model):
     story = models.ForeignKey(
         Story, on_delete=models.CASCADE, related_name="story_chatlog"
     )
     chat_log = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)    
+    updated_at = models.DateTimeField(auto_now=True)
+
 
 class Character(models.Model):
     story = models.ForeignKey(
@@ -31,6 +34,7 @@ class Character(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+
 class StoryContent(models.Model):
     story = models.ForeignKey(
         Story, on_delete=models.CASCADE, related_name="story_content"
@@ -41,7 +45,9 @@ class StoryContent(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+
 from django.db import models
+
 
 class Background(models.Model):
     GENRE_CHOICES = (
@@ -59,5 +65,3 @@ class Background(models.Model):
     summary = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-
-
