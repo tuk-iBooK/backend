@@ -13,15 +13,7 @@ class RegisterAPIView(APIView):
         serializer = UserSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
-            
-            res = Response(
-                {
-                    "message": "register successs",
-                },
-                status=status.HTTP_200_OK,
-            )
-
-            return res
+            return Response({"message": "register successs",}, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
 class AuthAPIView(APIView):
@@ -35,7 +27,7 @@ class AuthAPIView(APIView):
             token = TokenObtainPairSerializer.get_token(user)
             refresh_token = str(token)
             access_token = str(token.access_token)
-            res = Response(
+            return Response(
                 {
                     "message": "login success",
                     "token": {
@@ -45,9 +37,8 @@ class AuthAPIView(APIView):
                 },
                 status=status.HTTP_200_OK,
             )
-            return res
         else:
-            return Response({"error": "login fail"}, status=status.HTTP_401_UNAUTHORIZED)
+            return Response({"message": "login fail"}, status=status.HTTP_401_UNAUTHORIZED)
         
     @permission_classes([IsAuthenticated])
     def get(self, request):
