@@ -15,61 +15,148 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='Story',
+            name="Story",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('title', models.CharField(max_length=100)),
-                ('content', models.TextField()),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='user_story', to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("title", models.CharField(max_length=100)),
+                ("content", models.TextField()),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "user",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="user_story",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='ChatLog',
+            name="ChatLog",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('chat_log', models.TextField()),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('story', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='story_chatlog', to='story.story')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("chat_log", models.TextField()),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "story",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="story_chatlog",
+                        to="story.story",
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='Character',
+            name="Character",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('age', models.IntegerField()),
-                ('gender', models.CharField(max_length=10)),
-                ('name', models.CharField(max_length=20)),
-                ('personality', models.CharField(max_length=100)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('story', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='story_character', to='story.story')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("age", models.IntegerField()),
+                ("gender", models.CharField(max_length=10)),
+                ("name", models.CharField(max_length=20)),
+                ("personality", models.CharField(max_length=100)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "story",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="story_character",
+                        to="story.story",
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='Background',
+            name="Background",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('genre', models.CharField(choices=[('fantasy', 'Fantasy'), ('adventure', 'Adventure'), ('fairy_tale', 'Fairy Tale'), ('mythology', 'Mythology'), ('science_fiction', 'Science Fiction')], max_length=100)),
-                ('time_period', models.CharField(max_length=100)),
-                ('summary', models.TextField()),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('story', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='story_background', to='story.story')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "genre",
+                    models.CharField(
+                        choices=[
+                            ("fantasy", "Fantasy"),
+                            ("adventure", "Adventure"),
+                            ("fairy_tale", "Fairy Tale"),
+                            ("mythology", "Mythology"),
+                            ("science_fiction", "Science Fiction"),
+                        ],
+                        max_length=100,
+                    ),
+                ),
+                ("time_period", models.CharField(max_length=100)),
+                ("summary", models.TextField()),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "story",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="story_background",
+                        to="story.story",
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='StoryContent',
+            name="StoryContent",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('page', models.IntegerField()),
-                ('content', models.TextField()),
-                ('image', models.CharField(max_length=255)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('story', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='story_content', to='story.story')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("page", models.IntegerField()),
+                ("content", models.TextField()),
+                ("image", models.CharField(max_length=255)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "story",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="story_content",
+                        to="story.story",
+                    ),
+                ),
             ],
         ),
     ]
