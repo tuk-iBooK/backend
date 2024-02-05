@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
+from django.core.exceptions import ValidationError
 
 
 class CustomUserManager(BaseUserManager):
@@ -7,18 +8,24 @@ class CustomUserManager(BaseUserManager):
     use_in_migrations = True
 
     def create_user(self, email, nickname, password):
-
         if not email:
             raise ValueError("이메일을 작성해주세요")
-        user = self.model(
-            email=self.normalize_email(email), nickname=nickname, password=password
-        )
+
+        if self.model.objects.filter(nickname=nickname).exists():
+            raise ValueError("이미 사용중인 닉네임입니다.")
+
+        if not password:
+            raise ValueError("비밀번호를 입력해주세요")
+
+        user = self.model(email=self.normalize_email(email), nickname=nickname)
 
         user.set_password(password)
         user.save(using=self._db)
         return user
 
     def create_superuser(self, email, nickname, password):
+        if not password:
+            raise ValueError("비밀번호를 입력해주세요")
 
         user = self.create_user(
             email=self.normalize_email(email), nickname=nickname, password=password
@@ -32,7 +39,7 @@ class CustomUserManager(BaseUserManager):
 class User(AbstractBaseUser):
 
     email = models.EmailField(max_length=255, unique=True)
-    nickname = models.CharField(max_length=10)
+    nickname = models.CharField(max_length=10, unique=True)  # 닉네임에 대한 고유성 보장
     created_on = models.DateTimeField(auto_now_add=True)
     is_admin = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)

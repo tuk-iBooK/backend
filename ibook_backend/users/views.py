@@ -1,6 +1,6 @@
 from django.contrib.auth import authenticate
 from rest_framework.decorators import permission_classes
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.views import APIView
 
 from .serializers import *
@@ -10,6 +10,8 @@ from rest_framework.response import Response
 
 
 class RegisterAPIView(APIView):
+
+    @permission_classes([AllowAny])
     def post(self, request):
         serializer = UserSerializer(data=request.data)
         if serializer.is_valid():
@@ -24,6 +26,8 @@ class RegisterAPIView(APIView):
 
 
 class AuthAPIView(APIView):
+
+    @permission_classes([AllowAny])
     def post(self, request):
 
         user = authenticate(

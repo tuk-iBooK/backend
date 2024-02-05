@@ -46,9 +46,6 @@ class StoryContent(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
 
-from django.db import models
-
-
 class Background(models.Model):
     GENRE_CHOICES = (
         ("fantasy", "Fantasy"),
