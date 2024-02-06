@@ -6,7 +6,7 @@ from users.models import User
 class Story(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="user_story")
     title = models.CharField(max_length=100)
-    content = models.TextField()
+    image = models.CharField(max_length=255)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -59,6 +59,7 @@ class Background(models.Model):
     )
     genre = models.CharField(max_length=100, choices=GENRE_CHOICES)
     time_period = models.CharField(max_length=100)
+    back_ground = models.CharField(max_length=100)
     summary = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
