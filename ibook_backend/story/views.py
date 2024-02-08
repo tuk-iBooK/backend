@@ -131,3 +131,53 @@ class ChatgptAPIView(APIView):
 
         # 생성된 응답 반환
         return Response({"answer": answer})
+
+def delleIMG(query):
+    openai.api_key = settings.OPENAI_API_KEY
+
+    model = "gpt-3.5-turbo"
+
+    messages = [
+        {
+            "role": "system",
+            "content": "You are a helpful assistant who is good at translating.",
+        },
+        {"role": "assistant", "content": query},
+    ]
+
+    # 사용자 메시지 추가
+    messages.append({"role": "user", "content": "영어로 번역해주세요."})
+
+    # ChatGPT API 호출하기
+    response = openai.ChatCompletion.create(model=model, messages=messages)
+    answer3 = response["choices"][0]["message"]["content"]
+    # 새 메시지 구성
+    messages = [
+        {
+            "role": "system",
+            "content": "You are an assistant who is good at creating prompts for image creation.",
+        },
+        {"role": "assistant", "content": answer3},
+    ]
+
+    # 사용자 메시지 추가
+    messages.append(
+        {
+            "role": "user",
+            "content": "Condense up to 4 outward description to focus on nouns and adjectives separated by ,",
+        }
+    )
+
+    # ChatGPT API 호출하기
+    response = openai.ChatCompletion.create(model=model, messages=messages)
+    answer4 = response["choices"][0]["message"]["content"]
+    print(answer4)
+
+    # 이미지 생성을 위한 프롬프트
+    params = ", concept art, realistic lighting, ultra-detailed, 8K, photorealism, digital art"
+    prompt = f"{answer4}{params}"
+    print(prompt)
+
+    response = openai.Image.create(prompt=prompt, n=1, size="512x512")
+    image_url = response["data"][0]["url"]
+    print(image_url)
