@@ -161,6 +161,17 @@ USE_I18N = True
 
 USE_TZ = True
 
+# AWS Setting
+AWS_S3_REGION_NAME = os.environ.get("AWS_S3_REGION_NAME") #AWS서버의 지역
+AWS_STORAGE_BUCKET_NAME = os.environ.get("AWS_STORAGE_BUCKET_NAME") #생성한 버킷 이름
+AWS_ACCESS_KEY_ID = os.environ.get("AWS_ACCESS_KEY_ID") #액서스 키 ID
+AWS_SECRET_ACCESS_KEY = os.environ.get("AWS_SECRET_ACCESS_KEY") #액서스 키 PW
+
+#버킷이름.s3.AWS서버지역.amazonaws.com 형식
+AWS_S3_CUSTOM_DOMAIN = '%s.s3.%s.amazonaws.com' % (AWS_STORAGE_BUCKET_NAME, AWS_S3_REGION_NAME)
+
+DEFAULT_FILE_STORAGE = "storages.backends.s3.S3Storage"
+STATICFILES_STORAGE = "storages.backends.s3.S3Storage"
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
