@@ -12,7 +12,15 @@ from rest_framework.decorators import permission_classes
 from .models import Background, Character, Story
 from .serializers import CharacterSerializer, StorySerializer, BackgroundSerializer
 
+import os
 import openai
+import requests
+import random
+import datetime
+from io import BytesIO
+
+import boto3
+from PIL import Image
 
 
 @permission_classes([IsAuthenticated])
@@ -131,6 +139,18 @@ class ChatgptAPIView(APIView):
 
         # 생성된 응답 반환
         return Response({"answer": answer})
+    
+class ChatgptImageAPIView(APIView):
+    @permission_classes([AllowAny])
+    def post(self, request):
+        query = request.data.get("query", None)
+        
+        if query is None:
+            return Response({"error": "query is required"}, status=400)
+        
+        image_url = delleIMG(query)
+
+        return Response({"image_url": image_url})
 
 def delleIMG(query):
     openai.api_key = settings.OPENAI_API_KEY
@@ -181,3 +201,50 @@ def delleIMG(query):
     response = openai.Image.create(prompt=prompt, n=1, size="512x512")
     image_url = response["data"][0]["url"]
     print(image_url)
+    
+    # 이미지 다운로드
+    res = requests.get(image_url)
+    if res.status_code != 200:
+        return Response({"error" : "Failed to download image"}, status=400)
+    
+    # 이미지 열기
+    img = Image.open(BytesIO(res.content))
+    
+    # S3에 이미지 저장
+    # 고유한 키 이름 생성
+    now = datetime.datetime.now()
+    random_suffix = random.randint(1000, 9999)
+    s3_filename = f'images/{now.strftime("%Y-%m-%d-%H-%M-%S")}_{random_suffix}.png'
+    
+    s3_bucket = settings.AWS_STORAGE_BUCKET_NAME
+    print(s3_bucket)
+    
+    save_image_to_s3(img, s3_bucket, s3_filename)
+    
+    # 저장된 이미지의 URL 생성
+    aws_s3_download_url = os.environ.get('AWS_S3_DOWNLOAD_UAL')
+    image_s3_url = f'{aws_s3_download_url}/{s3_filename}'
+    print(image_s3_url)
+    
+    return image_s3_url
+
+def save_image_to_s3(image, bucket_name, file_name):
+    try:
+        # S3에 이미지 업로드
+        s3 = boto3.client(
+            "s3",
+            aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+            aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
+            region_name=settings.AWS_S3_REGION_NAME,
+        )
+        with BytesIO() as output:
+            image.save(output, format="PNG")
+            output.seek(0)
+            s3.upload_fileobj(output, bucket_name, file_name)
+        print(
+            f"Image saved successfully to S3 bucket: {bucket_name}, with file name: {file_name}"
+        )
+        return True
+    except Exception as e:
+        print(f"Failed to save image to S3: {str(e)}")
+        return False
