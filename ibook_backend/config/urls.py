@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.urls import path
 from users.views import AuthAPIView, RegisterAPIView
 from story.views import CharacterAPIView, StoryAPIView, BackgroundAPIView
-from story.views import ChatgptAPIView, ChatgptImageAPIView
+from story.views import ChatgptAPIView, ChatgptImageAPIView, StoryContentAPIView
 
 from rest_framework_simplejwt.views import TokenRefreshView
 
@@ -17,4 +17,5 @@ urlpatterns = [
     path("api/story/register/background/", BackgroundAPIView.as_view()),
     path("api/story/register/chatgpt/", ChatgptAPIView.as_view()),
     path("api/story/register/chatgpt/image/", ChatgptImageAPIView.as_view()),
+    path("api/story-content/", StoryContentAPIView.as_view()),
 ]

@@ -11,7 +11,12 @@ from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
 from rest_framework.decorators import permission_classes
 from .models import Background, Character, Story, StoryContent
-from .serializers import CharacterSerializer, StorySerializer, BackgroundSerializer
+from .serializers import (
+    CharacterSerializer,
+    StorySerializer,
+    BackgroundSerializer,
+    StoryContentSerializer,
+)
 
 import os
 import openai
@@ -41,6 +46,24 @@ class StoryAPIView(APIView):
             )
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class StoryContentAPIView(APIView):
+
+    def get(self, request):
+        story_id = request.query_params.get("story_id")
+        page = request.query_params.get("page")
+
+        if not story_id or not page:
+            return Response(
+                {"error": "story_id와 page 파라미터가 필요합니다."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        story_content = StoryContent.objects.get(story_id=story_id, page=page)
+
+        serializer = StoryContentSerializer(story_content)
+        return Response(serializer.data)
 
 
 @permission_classes([IsAuthenticated])
@@ -202,18 +225,20 @@ class ChatgptAPIView(APIView):
 
         story_content.save()
         return Response({"answer": answer})
-    
+
+
 class ChatgptImageAPIView(APIView):
     @permission_classes([AllowAny])
     def post(self, request):
         query = request.data.get("query", None)
-        
+
         if query is None:
             return Response({"error": "query is required"}, status=400)
-        
+
         image_url = delleIMG(query)
 
         return Response({"image_url": image_url})
+
 
 def delleIMG(query):
     openai.api_key = settings.OPENAI_API_KEY
@@ -264,32 +289,33 @@ def delleIMG(query):
     response = openai.Image.create(prompt=prompt, n=1, size="512x512")
     image_url = response["data"][0]["url"]
     print(image_url)
-    
+
     # 이미지 다운로드
     res = requests.get(image_url)
     if res.status_code != 200:
-        return Response({"error" : "Failed to download image"}, status=400)
-    
+        return Response({"error": "Failed to download image"}, status=400)
+
     # 이미지 열기
     img = Image.open(BytesIO(res.content))
-    
+
     # S3에 이미지 저장
     # 고유한 키 이름 생성
     now = datetime.datetime.now()
     random_suffix = random.randint(1000, 9999)
     s3_filename = f'images/{now.strftime("%Y-%m-%d-%H-%M-%S")}_{random_suffix}.png'
-    
+
     s3_bucket = settings.AWS_STORAGE_BUCKET_NAME
     print(s3_bucket)
-    
+
     save_image_to_s3(img, s3_bucket, s3_filename)
-    
+
     # 저장된 이미지의 URL 생성
-    aws_s3_download_url = os.environ.get('AWS_S3_DOWNLOAD_UAL')
-    image_s3_url = f'{aws_s3_download_url}/{s3_filename}'
+    aws_s3_download_url = os.environ.get("AWS_S3_DOWNLOAD_UAL")
+    image_s3_url = f"{aws_s3_download_url}/{s3_filename}"
     print(image_s3_url)
-    
+
     return image_s3_url
+
 
 def save_image_to_s3(image, bucket_name, file_name):
     try:
