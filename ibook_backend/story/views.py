@@ -109,9 +109,11 @@ class ChatgptAPIView(APIView):
 
         system_message = """
 이야기는 한국어로 써주세요.
-동화의 제목을 처음에 제공합니다.
+한페이지 작성하고 질문하고 다음 페이지를 작성할 겁니다.
 작성할 때마다 100자 이내로 작성합니다.
 동화를 쓰고, 동화 중간에 사용자에게 간단한 선택지 3가지를 제시합니다.
+선택지를 제시하고 그 다음 아무 글이 나오지 않도록 합니다.
+선택지는 영어 대문자로 표시해줍니다.
         """
 
         messages = [{"role": "system", "content": system_message}]
@@ -133,6 +135,12 @@ class ChatgptAPIView(APIView):
                     ]
                 )
                 messages.append({"role": "system", "content": characters_info})
+                messages.append(
+                    {
+                        "role": "system",
+                        "content": '총 5페이지를 작성할 것입니다. 모든 페이지를 한번에 작성하는 것이 아니라 한페이지 작성하고 질문하고 다음 페이지를 작성할 겁니다. 제목을 처음에 제공합니다. "제목: "의 형식으로 제공합니다.',
+                    }
+                )
         else:
             story_contents = StoryContent.objects.filter(story=story).order_by("page")
 
@@ -151,7 +159,7 @@ class ChatgptAPIView(APIView):
                 messages.append(
                     {
                         "role": "system",
-                        "content": "동화를 끝내지 말고 이야기를 만들고 선택지 3개를 제시해주세요.",
+                        "content": f"동화를 끝내지 말고 이야기를 만들고 선택지 3개를 제시해주세요. 현재 총 {len(story_contents)} 페이지 작성했습니다. {(5 - len(story_contents))} 페이지 남았습니다.",
                     }
                 )
 
@@ -169,11 +177,29 @@ class ChatgptAPIView(APIView):
         print(answer)
 
         page_number = StoryContent.objects.filter(story=story).count() + 1
+
+        if answer.startswith("제목: "):
+
+            title = answer.split("\n")[0][len("제목: ") :].strip('"')
+            story.title = title
+            story.save()
+
+        # 주어진 문자열에서 "\n\n" 문자열이 마지막으로 나타나는 위치를 찾습니다.
+        last_double_newline_index = answer.rfind("\n\n")
+
+        # 마지막 "\n\n" 문자열 이전까지의 내용만을 추출합니다.
+        # 만약 "\n\n" 문자열이 없는 경우, 원래 문자열 전체를 사용합니다.
+        if last_double_newline_index != -1:
+            content_to_save = answer[:last_double_newline_index]
+        else:
+            content_to_save = answer
+
         story_content = StoryContent(
             story=story,
             page=page_number,
-            content=answer,
+            content=content_to_save,
         )
+
         story_content.save()
         return Response({"answer": answer})
     
