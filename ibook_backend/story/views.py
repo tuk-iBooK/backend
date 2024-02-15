@@ -13,7 +13,7 @@ from rest_framework.decorators import permission_classes
 from .models import Background, Character, Story, StoryContent
 from .serializers import (
     CharacterSerializer,
-    StorySerializer,
+    StoryListSerializer,
     BackgroundSerializer,
     StoryContentSerializer,
 )
@@ -29,23 +29,27 @@ import boto3
 from PIL import Image
 
 
-@permission_classes([IsAuthenticated])
 class StoryAPIView(APIView):
+
+    @permission_classes([AllowAny])
+    def get(self, request):
+
+        # 전체 스토리 조회
+        stories = Story.objects.all()
+        serializer = StoryListSerializer(stories, many=True)
+
+        return Response(serializer.data)
+
+    @permission_classes([IsAuthenticated])
     def post(self, request):
 
-        serializer = StorySerializer(data=request.data)
+        story = Story(user=request.user)  # user 필드는 요청을 보낸 사용자로 설정합니다.
+        story.save()
 
-        if serializer.is_valid():
-            serializer.save(user=request.user)
-
-            return Response(
-                {
-                    "message": "Story created successfully.",
-                },
-                status=status.HTTP_201_CREATED,
-            )
-
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        # 성공 응답을 반환합니다.
+        return Response(
+            {"message": "Story created successfully."}, status=status.HTTP_201_CREATED
+        )
 
 
 class StoryContentAPIView(APIView):

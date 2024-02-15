@@ -14,6 +14,7 @@ urlpatterns = [
     path("api/token/refresh/", TokenRefreshView.as_view()),
     path("api/story/register/character/", CharacterAPIView.as_view()),
     path("api/story/register/", StoryAPIView.as_view()),
+    path("api/story/", StoryAPIView.as_view()),
     path("api/story/register/background/", BackgroundAPIView.as_view()),
     path("api/story/register/chatgpt/", ChatgptAPIView.as_view()),
     path("api/story/register/chatgpt/image/", ChatgptImageAPIView.as_view()),
