@@ -61,3 +61,13 @@ class User(AbstractBaseUser):
     @property
     def is_staff(self):
         return self.is_admin
+
+class UserProfile(models.Model):
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="user_profile"
+    )
+    age = models.IntegerField()
+    gender = models.CharField(max_length=10)
+    description = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
