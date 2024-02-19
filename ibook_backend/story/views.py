@@ -48,7 +48,8 @@ class StoryAPIView(APIView):
 
         # 성공 응답을 반환합니다.
         return Response(
-            {"message": "Story created successfully."}, status=status.HTTP_201_CREATED
+            {"message": "Story created successfully.", "story_id": story.id},
+            status=status.HTTP_201_CREATED,
         )
 
 
