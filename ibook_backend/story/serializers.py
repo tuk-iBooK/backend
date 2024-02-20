@@ -5,7 +5,7 @@ from rest_framework import serializers
 class StoryListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Story
-        fields = ["title", "image"]  # 조회 시 'title'과 'image' 필드 포함
+        fields = ["pk", "title", "image"]  # 조회 시 pk 값과 'title'과 'image' 필드 포함
 
 
 class CharacterSerializer(serializers.ModelSerializer):
