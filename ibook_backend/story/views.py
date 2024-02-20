@@ -52,6 +52,21 @@ class StoryAPIView(APIView):
             status=status.HTTP_201_CREATED,
         )
 
+class UserStoryAPIView(APIView):
+    @permission_classes([IsAuthenticated])
+    def get(self, request):
+        user = request.user
+
+        if not user: 
+            Response(
+                {"error": "존재하지 않는 유저입니다."},
+                status=status.HTTP_401_UNAUTHORIZED
+            )
+        
+        stories = Story.objects.filter(user=user)
+        serializer = StoryListSerializer(stories, many=True)
+        
+        return Response(serializer.data)
 
 class StoryContentAPIView(APIView):
 
