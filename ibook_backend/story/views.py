@@ -190,7 +190,9 @@ class ChatgptAPIView(APIView):
             for story_content in story_contents:
                 messages.append({"role": "system", "content": story_content.content})
             print(len(story_contents))
-            messages.append({"role": "user", "content": user_choice})
+            messages.append(
+                {"role": "user", "content": "여기서 {}를 선택할께".format(user_choice)}
+            )
             if len(story_contents) >= 4:
                 messages.append(
                     {
@@ -237,11 +239,16 @@ class ChatgptAPIView(APIView):
         else:
             content_to_save = answer
 
+        image_url = delleIMG(content_to_save)
+
         story_content = StoryContent(
             story=story,
             page=page_number,
             content=content_to_save,
+            image=image_url,
         )
+
+        print(image_url)
 
         story_content.save()
         return Response({"answer": answer})
