@@ -52,21 +52,23 @@ class StoryAPIView(APIView):
             status=status.HTTP_201_CREATED,
         )
 
+
 class UserStoryAPIView(APIView):
     @permission_classes([IsAuthenticated])
     def get(self, request):
         user = request.user
 
-        if not user: 
+        if not user:
             Response(
                 {"error": "존재하지 않는 유저입니다."},
-                status=status.HTTP_401_UNAUTHORIZED
+                status=status.HTTP_401_UNAUTHORIZED,
             )
-        
+
         stories = Story.objects.filter(user=user)
         serializer = StoryListSerializer(stories, many=True)
-        
+
         return Response(serializer.data)
+
 
 class StoryContentAPIView(APIView):
 
@@ -125,10 +127,9 @@ class BackgroundAPIView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+@permission_classes([IsAuthenticated])
 class ChatgptAPIView(APIView):
-
     # background, character를 이용하여 이야기 제작 시작
-    @permission_classes([AllowAny])
     def post(self, request):
         story_id = request.data.get("story_id")
         user_choice = request.data.get("user_choice", None)
