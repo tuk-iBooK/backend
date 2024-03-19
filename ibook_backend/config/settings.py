@@ -23,7 +23,7 @@ SECRET_KEY = "django-insecure-uc0#0-k8z^6^3&=o-m#h5$*w1-^m!mw(*=*%h#=%=s3bjmpmyx
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["0.0.0.0", "localhost", "127.0.0.1"]
 
 
 # Application definition
@@ -162,13 +162,16 @@ USE_I18N = True
 USE_TZ = True
 
 # AWS Setting
-AWS_S3_REGION_NAME = os.environ.get("AWS_S3_REGION_NAME") #AWS서버의 지역
-AWS_STORAGE_BUCKET_NAME = os.environ.get("AWS_STORAGE_BUCKET_NAME") #생성한 버킷 이름
-AWS_ACCESS_KEY_ID = os.environ.get("AWS_ACCESS_KEY_ID") #액서스 키 ID
-AWS_SECRET_ACCESS_KEY = os.environ.get("AWS_SECRET_ACCESS_KEY") #액서스 키 PW
+AWS_S3_REGION_NAME = os.environ.get("AWS_S3_REGION_NAME")  # AWS서버의 지역
+AWS_STORAGE_BUCKET_NAME = os.environ.get("AWS_STORAGE_BUCKET_NAME")  # 생성한 버킷 이름
+AWS_ACCESS_KEY_ID = os.environ.get("AWS_ACCESS_KEY_ID")  # 액서스 키 ID
+AWS_SECRET_ACCESS_KEY = os.environ.get("AWS_SECRET_ACCESS_KEY")  # 액서스 키 PW
 
-#버킷이름.s3.AWS서버지역.amazonaws.com 형식
-AWS_S3_CUSTOM_DOMAIN = '%s.s3.%s.amazonaws.com' % (AWS_STORAGE_BUCKET_NAME, AWS_S3_REGION_NAME)
+# 버킷이름.s3.AWS서버지역.amazonaws.com 형식
+AWS_S3_CUSTOM_DOMAIN = "%s.s3.%s.amazonaws.com" % (
+    AWS_STORAGE_BUCKET_NAME,
+    AWS_S3_REGION_NAME,
+)
 
 DEFAULT_FILE_STORAGE = "storages.backends.s3.S3Storage"
 STATICFILES_STORAGE = "storages.backends.s3.S3Storage"
