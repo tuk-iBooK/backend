@@ -48,7 +48,7 @@ class StoryAPIView(APIView):
 
         # 성공 응답을 반환합니다.
         return Response(
-            {"message": "Story created successfully.", "story_id": story.id},
+            {"message": "Story created successfully.", "story": story.id},
             status=status.HTTP_201_CREATED,
         )
 
@@ -222,37 +222,81 @@ class ChatgptAPIView(APIView):
 
         print(answer)
 
-        page_number = StoryContent.objects.filter(story=story).count() + 1
+        # page_number = StoryContent.objects.filter(story=story).count() + 1
 
-        if answer.startswith("제목: "):
+        # if answer.startswith("제목: "):
 
-            title = answer.split("\n")[0][len("제목: ") :].strip('"')
-            story.title = title
-            story.save()
+        #     title = answer.split("\n")[0][len("제목: ") :].strip('"')
+        #     story.title = title
+        #     story.save()
 
         # 주어진 문자열에서 "\n\n" 문자열이 마지막으로 나타나는 위치를 찾습니다.
-        last_double_newline_index = answer.rfind("\n\n")
+        # last_double_newline_index = answer.rfind("\n\n")
 
         # 마지막 "\n\n" 문자열 이전까지의 내용만을 추출합니다.
         # 만약 "\n\n" 문자열이 없는 경우, 원래 문자열 전체를 사용합니다.
-        if last_double_newline_index != -1:
-            content_to_save = answer[:last_double_newline_index]
-        else:
-            content_to_save = answer
+        # if last_double_newline_index != -1:
+        #     content_to_save = answer[:last_double_newline_index]
+        # else:
+        #     content_to_save = answer
 
-        image_url = delleIMG(content_to_save)
+        # image_url = delleIMG(content_to_save)
+
+        # story_content = StoryContent(
+        #     story=story,
+        #     page=page_number,
+        #     content=content_to_save,
+        #     image=image_url,
+        # )
+
+        # print(image_url)
+
+        # story_content.save()
+        return Response({"answer": answer})
+
+
+@permission_classes([IsAuthenticated])
+class SaveStoryAPIView(APIView):
+    # 인증된 사용자만 접근 가능
+    def post(self, request, *args, **kwargs):
+        story_id = request.data.get("story_id")
+        content = request.data.get("content")
+
+        # 필수 필드 검증
+        if not story_id or not content:
+            return Response({"error": "story_id and content are required"}, status=400)
+
+        # Story 인스턴스 가져오기
+        story = get_object_or_404(Story, pk=story_id)
+
+        page_number = StoryContent.objects.filter(story=story).count() + 1
+
+        if content.startswith("제목: "):
+
+            title = content.split("\n")[0][len("제목: ") :].strip('"')
+            story.title = title
+            story.save()
+
+        # "A." 문자열이 처음으로 나타나는 위치를 찾습니다.
+        first_option_index = content.find("A.")
+
+        # "A." 문자열 이전까지의 내용만을 추출합니다.
+        # 만약 "A." 문자열이 없는 경우, 원래 문자열 전체를 사용합니다.
+        if first_option_index != -1:
+            content_to_save = content[:first_option_index].strip()
+        else:
+            content_to_save = content
 
         story_content = StoryContent(
             story=story,
             page=page_number,
             content=content_to_save,
-            image=image_url,
         )
 
-        print(image_url)
-
         story_content.save()
-        return Response({"answer": answer})
+
+        # 성공 응답 반환
+        return Response({"message": "Story saved successfully"})
 
 
 class ChatgptImageAPIView(APIView):
