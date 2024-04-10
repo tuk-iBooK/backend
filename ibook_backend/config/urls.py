@@ -1,8 +1,18 @@
 from django.contrib import admin
 from django.urls import path
 from users.views import AuthAPIView, RegisterAPIView, UserProfileView
-from story.views import CharacterAPIView, StoryAPIView, BackgroundAPIView, UserStoryAPIView
-from story.views import ChatgptAPIView, ChatgptImageAPIView, StoryContentAPIView
+from story.views import (
+    CharacterAPIView,
+    StoryAPIView,
+    BackgroundAPIView,
+    UserStoryAPIView,
+)
+from story.views import (
+    ChatgptAPIView,
+    ChatgptImageAPIView,
+    StoryContentAPIView,
+    SaveStoryAPIView,
+)
 
 from rest_framework_simplejwt.views import TokenRefreshView
 
@@ -21,4 +31,5 @@ urlpatterns = [
     path("api/story/register/chatgpt/", ChatgptAPIView.as_view()),
     path("api/story/register/chatgpt/image/", ChatgptImageAPIView.as_view()),
     path("api/story-content/", StoryContentAPIView.as_view()),
+    path("api/story/save_story/", SaveStoryAPIView.as_view()),
 ]
