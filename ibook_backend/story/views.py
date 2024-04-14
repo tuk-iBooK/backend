@@ -258,7 +258,7 @@ class ChatgptAPIView(APIView):
 @permission_classes([IsAuthenticated])
 class SaveStoryAPIView(APIView):
     # 인증된 사용자만 접근 가능
-    def post(self, request, *args, **kwargs):
+    def post(self, request):
         story_id = request.data.get("story_id")
         content = request.data.get("content")
 
@@ -310,6 +310,32 @@ class ChatgptImageAPIView(APIView):
         image_url = delleIMG(query)
 
         return Response({"image_url": image_url})
+
+
+@permission_classes([IsAuthenticated])
+class SaveImageAPIView(APIView):
+    def post(self, request):
+        story_id = request.data.get("story_id")
+        page_number = request.data.get("page_number")
+        image_url = request.data.get("image_url")
+        
+        # 필수 필드 검증
+        if not story_id or not image_url:
+            return Response({"error": "story_id and image_url are required"}, status=400)
+        
+        # 기존에 해당 story_id와 page_number에 해당하는 데이터가 있는지 확인
+        story_content = StoryContent.objects.filter(story_id=story_id, page=page_number).first()
+        
+        if story_content:  # 이미 데이터가 있는 경우
+            # 이미지 업데이트
+            story_content.image = image_url
+            story_content.save()
+            return Response({"message": "이미지가 성공적으로 저장되었습니다."})
+        
+        else:  # 데이터가 없을 경우
+            return Response({"error": "story_id, page_number에 해당하는 내용이 존재하지 않습니다."}, status=400)
+        
+
 
 
 def delleIMG(query):
