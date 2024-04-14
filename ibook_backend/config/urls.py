@@ -12,6 +12,7 @@ from story.views import (
     ChatgptImageAPIView,
     StoryContentAPIView,
     SaveStoryAPIView,
+    SaveImageAPIView,
 )
 
 from rest_framework_simplejwt.views import TokenRefreshView
@@ -39,4 +40,5 @@ urlpatterns = [
     path("api/story/register/chatgpt/", ChatgptAPIView.as_view()),
     path("api/story/register/chatgpt/image/", ChatgptImageAPIView.as_view()),
     path("api/story/save_story/", SaveStoryAPIView.as_view()),
+    path("api/story/save_image/", SaveImageAPIView.as_view()),
 ]
