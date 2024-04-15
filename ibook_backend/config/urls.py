@@ -41,4 +41,8 @@ urlpatterns = [
     path("api/story/register/chatgpt/image/", ChatgptImageAPIView.as_view()),
     path("api/story/save_story/", SaveStoryAPIView.as_view()),
     path("api/story/save_image/", SaveImageAPIView.as_view()),
+    path(
+        "api/story-content/update",
+        StoryContentAPIView.as_view(),
+    ),
 ]
