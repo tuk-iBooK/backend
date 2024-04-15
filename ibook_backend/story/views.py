@@ -87,6 +87,25 @@ class StoryContentAPIView(APIView):
         serializer = StoryContentSerializer(story_content)
         return Response(serializer.data)
 
+    @permission_classes([IsAuthenticated])
+    def put(self, request):
+        story_id = request.query_params.get("story_id")
+        page = request.query_params.get("page")
+        content = request.data.get("content")
+
+        if not story_id or not page:
+            return Response(
+                {"error": "story_id와 page 파라미터가 필요합니다."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        story_content = StoryContent.objects.get(story_id=story_id, page=page)
+        story_content.content = content
+        story_content.save()
+        return Response(
+            {"message": "Story content successfully updated."},
+            status=status.HTTP_200_OK,
+        )
+
 
 @permission_classes([IsAuthenticated])
 class CharacterAPIView(APIView):
