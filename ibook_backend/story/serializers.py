@@ -23,4 +23,5 @@ class BackgroundSerializer(serializers.ModelSerializer):
 class StoryContentSerializer(serializers.ModelSerializer):
     class Meta:
         model = StoryContent
-        fields = "__all__"
+        # fields = "__all__"
+        fields = ["page", "content", "image"]
