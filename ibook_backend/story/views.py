@@ -70,6 +70,28 @@ class UserStoryAPIView(APIView):
         return Response(serializer.data)
 
 
+class StoryContentListAPIView(APIView):
+
+    def get(self, request):
+        story_id = request.query_params.get("story_id")
+
+        if not story_id:
+            return Response(
+                {"error": "story_id가 필요합니다."}, status=status.HTTP_400_BAD_REQUEST
+            )
+
+        story_contents = StoryContent.objects.filter(story_id=story_id)
+
+        if not story_contents.exists():
+            return Response(
+                {"error": "해당 story_id로 스토리 콘텐츠를 찾을 수 없습니다."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        serializer = StoryContentSerializer(story_contents, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
 class StoryContentAPIView(APIView):
 
     def get(self, request):
@@ -173,7 +195,7 @@ class ChatgptAPIView(APIView):
         system_message = """
 이야기는 한국어로 써주세요.
 한페이지 작성하고 질문하고 다음 페이지를 작성할 겁니다.
-작성할 때마다 100자 이내로 작성합니다.
+작성할 때마다 300자 이내로 작성합니다.
 동화를 쓰고, 동화 중간에 사용자에게 간단한 선택지 3가지를 제시합니다.
 선택지를 제시하고 그 다음 아무 글이 나오지 않도록 합니다.
 선택지는 영어 대문자로 표시해줍니다.
@@ -217,14 +239,14 @@ class ChatgptAPIView(APIView):
                 messages.append(
                     {
                         "role": "system",
-                        "content": "동화를 끝내줘",
+                        "content": "동화를 끝내줘. 동화를 끝내고 나서 어떤 정보도 제공하지 말아줘.",
                     }
                 )
             else:
                 messages.append(
                     {
                         "role": "system",
-                        "content": f"동화를 끝내지 말고 이야기를 만들고 선택지 3개를 제시해주세요. 현재 총 {len(story_contents)} 페이지 작성했습니다. {(5 - len(story_contents))} 페이지 남았습니다.",
+                        "content": f"동화를 끝내지 말고 이야기를 만들고 선택지 3개를 제시해주세요. 현재 총 {len(story_contents)} 페이지 작성했습니다. {(5 - len(story_contents))} 페이지 남았습니다",
                     }
                 )
 
@@ -337,24 +359,29 @@ class SaveImageAPIView(APIView):
         story_id = request.data.get("story_id")
         page_number = request.data.get("page_number")
         image_url = request.data.get("image_url")
-        
+
         # 필수 필드 검증
         if not story_id or not image_url:
-            return Response({"error": "story_id and image_url are required"}, status=400)
-        
+            return Response(
+                {"error": "story_id and image_url are required"}, status=400
+            )
+
         # 기존에 해당 story_id와 page_number에 해당하는 데이터가 있는지 확인
-        story_content = StoryContent.objects.filter(story_id=story_id, page=page_number).first()
-        
+        story_content = StoryContent.objects.filter(
+            story_id=story_id, page=page_number
+        ).first()
+
         if story_content:  # 이미 데이터가 있는 경우
             # 이미지 업데이트
             story_content.image = image_url
             story_content.save()
             return Response({"message": "이미지가 성공적으로 저장되었습니다."})
-        
-        else:  # 데이터가 없을 경우
-            return Response({"error": "story_id, page_number에 해당하는 내용이 존재하지 않습니다."}, status=400)
-        
 
+        else:  # 데이터가 없을 경우
+            return Response(
+                {"error": "story_id, page_number에 해당하는 내용이 존재하지 않습니다."},
+                status=400,
+            )
 
 
 def delleIMG(query):
