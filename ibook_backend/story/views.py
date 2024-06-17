@@ -129,6 +129,116 @@ class StoryContentAPIView(APIView):
         )
 
 
+class UpdateStoryContentView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def put(self, request):
+        story_id = request.query_params.get("story_id")
+        content = request.data.get("content")
+
+        if not story_id:
+            return Response(
+                {"error": "story_id 파라미터가 필요합니다."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            # 해당 story_id에 대한 가장 큰 페이지 번호를 가져옴
+            last_page_content = (
+                StoryContent.objects.filter(story_id=story_id).order_by("-page").first()
+            )
+            if last_page_content is None:
+                return Response(
+                    {"error": "해당 story_id에 대한 페이지를 찾을 수 없습니다."},
+                    status=status.HTTP_404_NOT_FOUND,
+                )
+
+            # 가장 큰 페이지의 내용을 업데이트
+            story_content = last_page_content
+            story_content.content = content
+            story_content.save()
+
+            return Response(
+                {"message": "Story content successfully updated."},
+                status=status.HTTP_200_OK,
+            )
+        except StoryContent.DoesNotExist:
+            return Response(
+                {"error": "해당 story_id에 대한 페이지를 찾을 수 없습니다."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+    def post(self, request):
+        story_id = request.data.get("story_id")
+
+        if not story_id:
+            return Response(
+                {"error": "story_id is required"},
+                status=400,
+            )
+
+        story = get_object_or_404(Story, pk=story_id)
+
+        # OpenAI API 키를 설정 파일에서 가져옴
+        openai.api_key = settings.OPENAI_API_KEY
+
+        # 사용할 모델 설정
+        model = "gpt-3.5-turbo"
+
+        # ChatGPT API를 사용하여 응답 생성
+        messages = []
+
+        system_message = """
+이야기는 한국어로 써주세요.
+한페이지 작성하고 질문하고 다음 페이지를 작성할 겁니다.
+작성할 때마다 300자 이내로 작성합니다. 그러나, 평문으로 작성되어야 합니다.
+동화를 쓰고, 동화 중간에 사용자에게 간단한 선택지 3가지를 제시합니다.
+선택지를 제시하고 그 다음 아무 글이 나오지 않도록 합니다.
+선택지는 영어 대문자로 표시해줍니다. 
+A.
+B.
+C.
+이러한 형태로 영어로 선택지를 제시합니다.
+        """
+
+        messages = [{"role": "system", "content": system_message}]
+
+        story_contents = StoryContent.objects.filter(story=story).order_by("page")
+
+        for story_content in story_contents:
+            messages.append({"role": "system", "content": story_content.content})
+
+        if len(story_contents) >= 4:
+            messages.append(
+                {
+                    "role": "system",
+                    "content": "동화를 끝내줘. 동화를 끝내고 나서 어떤 정보도 제공하지 말아줘.",
+                }
+            )
+        else:
+            messages.append(
+                {
+                    "role": "system",
+                    "content": f"동화를 끝내지 말고 이야기를 만들고 선택지 3개를 제시해주세요. 현재 총 {len(story_contents)} 페이지 작성했습니다. {(5 - len(story_contents))} 페이지 남았습니다",
+                }
+            )
+
+        print(messages)
+
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=messages,
+            temperature=0.7,  # 창의성을 조절
+            # max_tokens=50,  # 생성할 최대 토큰 수
+        )
+
+        answer = response["choices"][0]["message"]["content"]
+
+        print(answer)
+
+        return Response({"answer": answer})
+
+
 @permission_classes([IsAuthenticated])
 class CharacterAPIView(APIView):
     def post(self, request):
@@ -297,6 +407,64 @@ C.
         # print(image_url)
 
         # story_content.save()
+        return Response({"answer": answer})
+
+
+class ChatgptChoiceAPIView(APIView):
+    @permission_classes([IsAuthenticated])
+    def post(self, request):
+        story_id = request.data.get("story_id")
+
+        if not story_id:
+            return Response({"error": "story_id is required"}, status=400)
+
+        story = get_object_or_404(Story, pk=story_id)
+
+        # OpenAI API 키를 설정 파일에서 가져옴
+        openai.api_key = settings.OPENAI_API_KEY
+
+        # 사용할 모델 설정
+        model = "gpt-3.5-turbo"
+
+        # ChatGPT API를 사용하여 응답 생성
+        messages = []
+
+        system_message = """
+        이야기는 한국어로 써주세요.
+        한페이지 작성하고 질문하고 다음 페이지를 작성할 겁니다.
+        작성할 때마다 300자 이내로 작성합니다. 그러나, 평문으로 작성되어야 합니다.
+        동화를 쓰고, 동화 중간에 사용자에게 간단한 선택지 3가지를 제시합니다.
+        선택지를 제시하고 그 다음 아무 글이 나오지 않도록 합니다.
+        선택지는 영어 대문자로 표시해줍니다. 
+        A.
+        B.
+        C.
+        이러한 형태로 영어로 선택지를 제시합니다.
+        """
+
+        messages = [{"role": "system", "content": system_message}]
+
+        story_contents = StoryContent.objects.filter(story=story).order_by("page")
+
+        for story_content in story_contents:
+            messages.append({"role": "system", "content": story_content.content})
+
+        messages.append(
+            {
+                "role": "system",
+                "content": "다음 어떤 내용이 이어질지 사용자가 선택할 수 있게 선택지를 제시해줘.",
+            }
+        )
+
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=messages,
+            temperature=0.7,
+        )
+
+        print(messages)
+
+        answer = response["choices"][0]["message"]["content"]
         return Response({"answer": answer})
 
 
