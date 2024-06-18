@@ -574,7 +574,7 @@ def delleIMG(query):
     messages.append(
         {
             "role": "user",
-            "content": "Condense up to 4 outward description to focus on nouns and adjectives separated by ,",
+            "content": "From the given story, create a single detailed sentence focusing on the most visually striking scene, including key characters and their surroundings.",
         }
     )
 
