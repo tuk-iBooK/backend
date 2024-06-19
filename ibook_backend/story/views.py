@@ -561,34 +561,20 @@ def delleIMG(query):
 
     model = "gpt-3.5-turbo"
 
-    messages = [
-        {
-            "role": "system",
-            "content": "You are a helpful assistant who is good at translating.",
-        },
-        {"role": "assistant", "content": query},
-    ]
-
-    # 사용자 메시지 추가
-    messages.append({"role": "user", "content": "영어로 번역해주세요."})
-
-    # ChatGPT API 호출하기
-    response = openai.ChatCompletion.create(model=model, messages=messages)
-    answer3 = response["choices"][0]["message"]["content"]
     # 새 메시지 구성
     messages = [
         {
             "role": "system",
             "content": "You are an assistant who is good at creating prompts for image creation.",
         },
-        {"role": "assistant", "content": answer3},
+        {"role": "user", "content": query},
     ]
 
     # 사용자 메시지 추가
     messages.append(
         {
             "role": "user",
-            "content": "Condense up to 4 outward description to focus on nouns and adjectives separated by ,",
+            "content": "From the given story, create a single detailed sentence focusing on the most visually striking scene, including key characters and their surroundings.",
         }
     )
 
@@ -598,7 +584,7 @@ def delleIMG(query):
     print(answer4)
 
     # 이미지 생성을 위한 프롬프트
-    params = ", concept art, realistic lighting, ultra-detailed, 8K, photorealism, digital art"
+    params = ", fairy tale style, storybook illustration, whimsical, pastel colors, childlike"
     prompt = f"{answer4}{params}"
     print(prompt)
 
