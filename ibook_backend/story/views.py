@@ -574,7 +574,7 @@ def delleIMG(query):
     messages.append(
         {
             "role": "user",
-            "content": "From the given story, create a single detailed sentence focusing on the most visually striking scene, including key characters and their surroundings.",
+            "content": "From the given story, create a single detailed sentence focusing on the most visually striking scene, including key characters and their surroundings, and keep it around 100 characters long.",
         }
     )
 
