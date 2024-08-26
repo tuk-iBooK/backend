@@ -496,9 +496,9 @@ class SaveStoryAPIView(APIView):
         # "A." 문자열 이전까지의 내용만을 추출합니다.
         # 만약 "A." 문자열이 없는 경우, 원래 문자열 전체를 사용합니다.
         if first_option_index != -1:
-            content_to_save = content[:first_option_index].strip()
+            content_to_save = content[len("제목: ") : first_option_index].strip()
         else:
-            content_to_save = content
+            content_to_save = content[len("제목: ") :].strip()
 
         story_content = StoryContent(
             story=story,
