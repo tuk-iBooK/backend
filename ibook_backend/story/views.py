@@ -537,6 +537,12 @@ class SaveImageAPIView(APIView):
             return Response(
                 {"error": "story_id and image_url are required"}, status=400
             )
+            
+        # 첫 페이지일 경우 썸네일로 저장
+        if page_number == 1:
+            story = Story.objects.filter(id=story_id).first()
+            story.image = image_url
+            story.save()
 
         # 기존에 해당 story_id와 page_number에 해당하는 데이터가 있는지 확인
         story_content = StoryContent.objects.filter(
