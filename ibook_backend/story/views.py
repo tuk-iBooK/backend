@@ -487,6 +487,7 @@ class SaveStoryAPIView(APIView):
         if content.startswith("제목: "):
 
             title = content.split("\n")[0][len("제목: ") :].strip('"')
+            print("제목은 바로 이것:" + title)
             story.title = title
             story.save()
 
@@ -496,9 +497,11 @@ class SaveStoryAPIView(APIView):
         # "A." 문자열 이전까지의 내용만을 추출합니다.
         # 만약 "A." 문자열이 없는 경우, 원래 문자열 전체를 사용합니다.
         if first_option_index != -1:
-            content_to_save = content[len("제목: ") : first_option_index].strip()
+            content_to_save = content[content.find("\n\n", len("제목: ")) + 2 : first_option_index].strip()
+            print("내용은 바로 이것:" + content_to_save)
         else:
-            content_to_save = content[len("제목: ") :].strip()
+            content_to_save = content[content.find("\n\n", len("제목: ")) + 2 :].strip()
+            print("내용은 바로 이것:" + content_to_save)
 
         story_content = StoryContent(
             story=story,
