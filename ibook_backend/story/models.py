@@ -39,6 +39,7 @@ class StoryContent(models.Model):
     story = models.ForeignKey(
         Story, on_delete=models.CASCADE, related_name="story_content"
     )
+    title = models.CharField(max_length=100)
     page = models.IntegerField()
     content = models.TextField()
     image = models.CharField(max_length=255)

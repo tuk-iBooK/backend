@@ -24,4 +24,4 @@ class StoryContentSerializer(serializers.ModelSerializer):
     class Meta:
         model = StoryContent
         # fields = "__all__"
-        fields = ["page", "content", "image"]
+        fields = ["title", "page", "content", "image"]

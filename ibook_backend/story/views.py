@@ -505,6 +505,7 @@ class SaveStoryAPIView(APIView):
 
         story_content = StoryContent(
             story=story,
+            title=title,
             page=page_number,
             content=content_to_save,
         )
