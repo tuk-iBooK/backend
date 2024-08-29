@@ -483,13 +483,17 @@ class SaveStoryAPIView(APIView):
         story = get_object_or_404(Story, pk=story_id)
 
         page_number = StoryContent.objects.filter(story=story).count() + 1
+        
+        title = None
 
         if content.startswith("제목: "):
-
             title = content.split("\n")[0][len("제목: ") :].strip('"')
             print("제목은 바로 이것:" + title)
             story.title = title
             story.save()
+        else:
+            # "제목: " 문단이 없을 경우 기본 제목 지정
+            title = f"Page {page_number}"
 
         # "A." 문자열이 처음으로 나타나는 위치를 찾습니다.
         first_option_index = content.find("A.")
