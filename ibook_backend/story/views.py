@@ -306,6 +306,7 @@ class ChatgptAPIView(APIView):
 이야기는 한국어로 써주세요.
 한페이지 작성하고 질문하고 다음 페이지를 작성할 겁니다.
 작성할 때마다 300자 이내로 작성합니다. 그러나, 평문으로 작성되어야 합니다.
+선택지를 제시하기 전에 의문문으로 끝나게 하지 말아주세요
 동화를 쓰고, 동화 중간에 사용자에게 간단한 선택지 3가지를 제시합니다.
 선택지를 제시하고 그 다음 아무 글이 나오지 않도록 합니다.
 선택지는 영어 대문자로 표시해줍니다. 
@@ -368,6 +369,7 @@ C.
 
         response = openai.ChatCompletion.create(
             model="gpt-3.5-turbo",
+            # model="gpt-4",
             messages=messages,
             temperature=0.7,  # 창의성을 조절
             # max_tokens=50,  # 생성할 최대 토큰 수
@@ -474,7 +476,7 @@ class SaveStoryAPIView(APIView):
     def post(self, request):
         story_id = request.data.get("story_id")
         content = request.data.get("content")
-
+        print("원본 content: " + content)
         # 필수 필드 검증
         if not story_id or not content:
             return Response({"error": "story_id and content are required"}, status=400)
@@ -483,30 +485,46 @@ class SaveStoryAPIView(APIView):
         story = get_object_or_404(Story, pk=story_id)
 
         page_number = StoryContent.objects.filter(story=story).count() + 1
-        
+
         title = None
+
+        lines = content.strip().split("\n")
+
+        # 첫 번째 줄이 제목이라고 가정하고 나머지 내용을 합침
 
         if content.startswith("제목: "):
             title = content.split("\n")[0][len("제목: ") :].strip('"')
             print("제목은 바로 이것:" + title)
             story.title = title
             story.save()
+            content = "\n".join(lines[1:]).strip()
         else:
             # "제목: " 문단이 없을 경우 기본 제목 지정
-            title = f"Page {page_number}"
+            # title = f"Page {page_number}"
+            title = story.title
 
         # "A." 문자열이 처음으로 나타나는 위치를 찾습니다.
         first_option_index = content.find("A.")
+        print("숫자 인덱스: " + str(first_option_index))
 
         # "A." 문자열 이전까지의 내용만을 추출합니다.
         # 만약 "A." 문자열이 없는 경우, 원래 문자열 전체를 사용합니다.
-        if first_option_index != -1:
-            content_to_save = content[content.find("\n\n", len("제목: ")) + 2 : first_option_index].strip()
-            print("내용은 바로 이것:" + content_to_save)
-        else:
-            content_to_save = content[content.find("\n\n", len("제목: ")) + 2 :].strip()
-            print("내용은 바로 이것:" + content_to_save)
+        # if first_option_index != -1:
+        #     content_to_save = content[
+        #         content.find("\n\n", len("제목: ")) + 2 : first_option_index
+        #     ].strip()
+        #     print("내용은 바로 이것:" + content_to_save)
+        # else:
+        #     # content_to_save = content[content.find("\n\n", len("제목: ")) + 2 :].strip()
+        #     content_to_save = content
+        #     print("내용은 바로 이것:" + content_to_save)
 
+        if first_option_index != -1:
+            # "A." 이전의 내용을 추출합니다.
+            content_to_save = content[:first_option_index].strip()
+        else:
+            # "A."가 없으면 전체 내용을 사용합니다.
+            content_to_save = content.strip()
         story_content = StoryContent(
             story=story,
             title=title,
@@ -545,7 +563,7 @@ class SaveImageAPIView(APIView):
             return Response(
                 {"error": "story_id and image_url are required"}, status=400
             )
-            
+
         # 첫 페이지일 경우 썸네일로 저장
         if page_number == 1:
             story = Story.objects.filter(id=story_id).first()
